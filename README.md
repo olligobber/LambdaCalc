@@ -85,16 +85,18 @@ Quitting
 Expressions in lambda calculus can be broken up into lambdas, brackets, dots,
 variables and spaces. Valid characters for lambdas are `\` and `λ`. Brackets
 must be `(` and `)`, and dots must be `.`. A space can be any unicode space
-character, including `\t`, `\n`, `\r`, `\f`, `\v`. A variable must consist of
-one or more characters, which can be `'`, `"`, `_`,`` ` `` or any alphanumeric
-character except `λ`. `a`, `` A` ``, `__var__` and `"你好"` are all valid
-variables.
+character, including `\t`, `\n`, `\r`, `\f`, and `\v`. A variable must consist
+of one or more characters, which can be `'`, `"`, `_`,`` ` `` or any
+alphanumeric character except `λ`. For example, `a`, `` A` ``, `12`, `__var__`
+and `"你好"` are all valid variables.
 
 Extra spaces are ignored, and spaces either side of brackets, dots and lambdas
 are ignored. For example, `\x.(x y)` and ` \ x . ( x  y ) ` are parsed
 identically, but `ab` and `a b` are not.
 
-An expression can be either binding a variable, or applying a variable.
+An expression can be a variable, a lambda binding a variable, or the
+application of two expressions.
+All the valid variables above are also valid expressions.
 Binding a variable is written as `\v.x`, where `\` can be any lambda, `v`
 can be any variable, and `x` can be any expression.
 Application can be written with spaces or brackets, such as `f x` or `f(x)`
@@ -105,3 +107,6 @@ The expression after a binding ends only at a close bracket or the end of the
 input. This means that `\x.a b c d` will be interpreted as `\x.(a b c d)`.
 To apply a variable to a binding, you must bracket the binding, such as
 `(\x.x) a`.
+
+Formalised details of the (context-free) language of acceptable expressions is
+shown in [this document](LambdaCFG.md).
