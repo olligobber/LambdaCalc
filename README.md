@@ -4,9 +4,10 @@ Lambda Calculus Tools and Interpreter written in Haskell
 ## Interpreter
 By compiling `Interpreter.hs`, one gets a simple interpreter. The interpreter
 takes the entire file, parses it as lambda calculus, and then simplifies it
-10,000,000 times, or until it cannot be simplified. Providing an optional
+1,000,000 times, or until it cannot be simplified. Providing an optional
 command line argument can increase or decrease the number of times it is
-simplified.
+simplified. Using `0` will simply parse and display the input. Using `-1`
+will simplify until it cannot be simplified.
 
 ### Example Usage
 ```
@@ -24,7 +25,11 @@ simplified.
 ((λa.λb.((b 1) a)) 2 λa.λb.a)
 ~$ cat test.lambda | ./Interpreter
 1
-~$
+~$ ./Interpreter 0 < forever.lambda
+(λa.(a a)) λa.(a a)
+~$ ./Interpreter < forever.lambda
+(λa.(a a)) λa.(a a)
+~$ ./Interpreter -1 < forever.lambda
 ```
 
 ## Interface
@@ -45,12 +50,12 @@ will remain stored and not be overwritten.
 `show` displays the stored expression.
 
 `interpret <times> [<lambda>]` simplifies expressions. The first argument is
-the number of times the expression will be simplified, and can be an integer
-or `forever` (or anything starting with `f`). Take care using this, as
-`interpret forever (\x.x x)(\x.x x)` will never finish.
+the number of times the expression will be simplified, and can be any
+non-negative integer or `forever` (or anything starting with `f`). Take
+care using this, as `interpret forever (\x.x x)(\x.x x)` will never finish.
 The second argument is the lambda expression that is to be simplified. If it
 is absent or fails to be parsed, the stored lambda expression will be
-simplified.
+simplified instead.
 
 ### Example Usage
 ```
