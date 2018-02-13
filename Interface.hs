@@ -51,7 +51,7 @@ interpret n x
         let (k, r) = interpretTimes Nothing (Just 0,x)
         in (Just r, Just (showInterpretation (k,r)))
     | isDecimal n =
-        let (k, r) = interpretTimes Nothing (Just 0,x)
+        let (k, r) = interpretTimes (Just (read n)) (Just 0,x)
         in (Just r, Just (showInterpretation (k,r)))
     | otherwise = (Nothing, Just "Invalid number")
 
