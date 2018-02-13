@@ -25,7 +25,7 @@ showInterpretation (n, x) = first ++ second where
         Nothing -> "Simplified tons.\n"
         Just 0 -> "Already simplified.\n"
         Just 1 -> "Simplified 1 time.\n"
-        Just k -> "Simplified " ++ show k ++ "times.\n"
+        Just k -> "Simplified " ++ show k ++ " times.\n"
     second = showExpression x
 
 help :: String
