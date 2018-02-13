@@ -3,13 +3,30 @@ import ProcessLambda
 import Data.Char (toLower)
 import System.IO (hFlush, stdout)
 
+type MI = Maybe Integer
+
+-- Cap for integers, prevents memory issues
+maxInt :: Integer
+maxInt = 999999999
+
 -- Simplifies an expression up to a certain number of times
-interpretTimes :: Maybe Int -> Expression -> (Int, Expression)
-interpretTimes (Just 0) x = (0, x)
-interpretTimes n x = case simplify x of
-    Nothing -> (0, x)
-    Just y -> (t+1, z) where
-        (t,z) = interpretTimes (pred<$>n) y
+interpretTimes :: MI -> (MI, Expression) -> (MI, Expression)
+interpretTimes (Just 0) x = x
+interpretTimes m (n,x) = case (n, simplify x) of
+    (_, Nothing) -> (succ<$>n, x)
+    (Nothing, Just y) -> interpretTimes (pred<$>m) (Nothing,y)
+    (Just k, Just y) -> if k > maxInt
+        then interpretTimes (pred<$>m) (Nothing,y)
+        else interpretTimes (pred<$>m) (succ<$>n,y)
+
+showInterpretation :: (MI, Expression) -> String
+showInterpretation (n, x) = first ++ second where
+    first = case n of
+        Nothing -> "Simplified tons.\n"
+        Just 0 -> "Already simplified.\n"
+        Just 1 -> "Simplified 1 time.\n"
+        Just k -> "Simplified " ++ show k ++ "times.\n"
+    second = showExpression x
 
 help :: String
 help = "Valid commands: parse, show, help, interpret, quit\n\
@@ -30,15 +47,13 @@ isDecimal (x:xs) = x `elem` "1234567890" && isDecimal xs
 -- Given a "number" input and an expression, produces output
 interpret :: String -> Expression -> (Maybe Expression, Maybe String)
 interpret n x
-    | toLower (head n) == 'f'   = let
-        (k, r) = interpretTimes Nothing x
-        o = "Simplified expression " ++ show k ++ " time(s).\n"
-        in (Just r, Just (o ++ showExpression r))
-    | isDecimal n               = let
-        (k, r) = interpretTimes (Just (read n)) x
-        o = "Simplified expression " ++ show k ++ " time(s).\n"
-        in (Just r, Just (o ++ showExpression r))
-    | otherwise                 = (Nothing, Just "Invalid number")
+    | toLower (head n) == 'f' =
+        let (k, r) = interpretTimes Nothing (Just 0,x)
+        in (Just r, Just (showInterpretation (k,r)))
+    | isDecimal n =
+        let (k, r) = interpretTimes Nothing (Just 0,x)
+        in (Just r, Just (showInterpretation (k,r)))
+    | otherwise = (Nothing, Just "Invalid number")
 
 -- Given the result of previous execution and a line of input, produces output
 stateLoop :: Maybe Expression -> String -> (Maybe Expression, Maybe String)
