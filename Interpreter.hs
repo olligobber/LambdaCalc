@@ -3,7 +3,7 @@ import ProcessLambda (showExpression, simplify, Expression)
 import System.Environment (getArgs)
 
 -- default maximum simplifies
-maxSimplifies :: Int
+maxSimplifies :: Integer
 maxSimplifies = 1000000
 
 -- Simplifies an expression up to a certain number of times

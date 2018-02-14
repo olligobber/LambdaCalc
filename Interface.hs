@@ -11,6 +11,15 @@ interpretTimes n (m,x) = seq m $ case simplify x of
     Nothing -> (m, x)
     Just y -> interpretTimes (pred<$>n) (m+1,y)
 
+-- Takes the result of interpretTimes and renders it
+showInterpret :: (Integer, Expression) -> String
+showInterpret (n, x) = first ++ ".\n" ++ second where
+    first = case n of
+        0 -> "Already fully simplified"
+        1 -> "Simplified 1 time"
+        k -> "Simplified " ++ show k ++ " times"
+    second = showExpression x
+
 help :: String
 help = "Valid commands: parse, show, help, interpret, quit\n\
 \   `parse x` will parse a lambda expression and store it\n\
@@ -32,12 +41,12 @@ interpret :: String -> Expression -> (Maybe Expression, Maybe String)
 interpret n x
     | toLower (head n) == 'f'   = let
         (k, r) = interpretTimes Nothing (0,x)
-        o = "Simplified expression " ++ show k ++ " time(s).\n"
-        in (Just r, Just (o ++ showExpression r))
+        o = showInterpret (k,r)
+        in (Just r, Just o)
     | isDecimal n               = let
         (k, r) = interpretTimes (Just (read n)) (0,x)
-        o = "Simplified expression " ++ show k ++ " time(s).\n"
-        in (Just r, Just (o ++ showExpression r))
+        o = showInterpret (k,r)
+        in (Just r, Just o)
     | otherwise                 = (Nothing, Just "Invalid number")
 
 -- Given the result of previous execution and a line of input, produces output
