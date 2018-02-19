@@ -123,7 +123,7 @@ parseStep ("",[],[p]) = Left (Just p)
 parseStep (a:as, Letter f:ts, ps)
     | f a           = Right (as, ts, Variable [a]:ps)
     | otherwise     = Left Nothing
-parseStep (ss, (Action n f):ts, ps) =
+parseStep (ss, Action n f:ts, ps) =
     Right (ss, ts, f (take n ps):drop n ps)
 parseStep ("", Symbol t:ts, ps) = case chooseProd Nothing t of
     Just n -> Right ("", (prodRules!!n)++ts, ps)
@@ -166,4 +166,4 @@ convert :: ParseTree -> Expression
 convert = convert' Map.empty 0
 
 parse :: String -> Maybe Expression
-parse s = convert <$> (parseTree s)
+parse s = convert <$> parseTree s

@@ -13,7 +13,7 @@ interpretTimes n (m,x) = seq m $ case simplify x of
 
 -- Takes the result of interpretTimes and renders it
 showInterpret :: (Integer, Expression) -> String
-showInterpret (n, x) = first ++ ".\n" ++ second where
+showInterpret (n, x) = first ++ ".\n" ++ second ++ "\n" where
     first = case n of
         0 -> "Already fully simplified"
         1 -> "Simplified 1 time"
@@ -47,29 +47,31 @@ interpret n x
         (k, r) = interpretTimes (Just (read n)) (0,x)
         o = showInterpret (k,r)
         in (Just r, Just o)
-    | otherwise                 = (Nothing, Just "Invalid number")
+    | otherwise                 = (Nothing, Just "Invalid number\n")
 
 -- Given the result of previous execution and a line of input, produces output
 stateLoop :: Maybe Expression -> String -> (Maybe Expression, Maybe String)
-stateLoop p s = case (toLower $ head $ head $ words s, tail $ words s) of
-    ('p',t) -> case parse (unwords t) of
-        Nothing -> (p, Just "Failed to parse")
-        Just q -> (Just q, Just "Parsed")
-    ('s',_) -> case p of
-        Nothing -> (Nothing, Just "Nothing has been parsed")
-        Just q -> (Just q, Just (showExpression q))
-    ('h',_) -> (p, Just help)
-    ('i',n:t) -> case (parse $ unwords t, p) of
-        (Nothing, Nothing) -> (Nothing, Just "Nothing has been parsed")
-        (Nothing, Just q) -> case interpret n q of
-            (Nothing, o) -> (p, o)
-            a -> a
-        (Just q, _) -> case interpret n q of
-            (Nothing, o) -> (p, o)
-            a -> a
-    ('i',_) -> (p, Just "Missing number")
-    ('q',_) -> (Nothing, Nothing)
-    _ -> (p, Just "Unrecognised command")
+stateLoop p s = case words s of
+    (h:_):r -> case (toLower h, r) of
+        ('p',t) -> case parse (unwords t) of
+            Nothing -> (p, Just "Failed to parse\n")
+            Just q -> (Just q, Just "Parsed\n")
+        ('s',_) -> case p of
+            Nothing -> (Nothing, Just "Nothing has been parsed\n")
+            Just q -> (Just q, Just (showExpression q ++ "\n"))
+        ('h',_) -> (p, Just help)
+        ('i',n:t) -> case (parse $ unwords t, p) of
+            (Nothing, Nothing) -> (Nothing, Just "Nothing has been parsed\n")
+            (Nothing, Just q) -> case interpret n q of
+                (Nothing, o) -> (p, o)
+                a -> a
+            (Just q, _) -> case interpret n q of
+                (Nothing, o) -> (p, o)
+                a -> a
+        ('i',_) -> (p, Just "Missing number\n")
+        ('q',_) -> (Nothing, Nothing)
+        _ -> (p, Just "Unrecognised command\n")
+    _ -> (p, Just "")
 
 loop :: Maybe Expression -> IO ()
 loop x = do
@@ -78,7 +80,7 @@ loop x = do
     i <- getLine
     case stateLoop x i of
         (y, Just o) -> do
-            putStrLn o
+            putStr o
             loop y
         (_, Nothing) -> do
             putStrLn "Quitting"

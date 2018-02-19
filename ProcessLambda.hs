@@ -16,7 +16,7 @@ data Expression =
 
 -- Default variable names
 variables :: [String]
-variables = ((:[]) <$> ['a'..'z']) ++ ((++"'") <$> variables)
+variables = (pure <$> ['a'..'z']) ++ ((++"'") <$> variables)
 
 {-
 -- Determines if a variable is unbound
@@ -50,6 +50,7 @@ unbindAt _ _ (Unbound s) = Unbound s
 showExpression' :: Expression -> [String] -> String
 showExpression' (Lambda x) (v:vs) =
     "λ" ++ v ++ "." ++ showExpression' (unbindAt (Unbound v) 1 x) vs
+showExpression' (Lambda _) _ = undefined -- Ran out of variable names
 showExpression' (Bound _) _ = undefined -- Malformed expression
 showExpression' (Apply (Lambda x) y) v =
     "(" ++ showExpression' (Lambda x) v ++ ") " ++ showExpression' y v
@@ -65,7 +66,7 @@ showExpression x = showExpression' x bound where
 -- Simplifies an expression by applying lambdas where possible
 -- Returns Nothing if no simplification could be done
 simplify :: Expression -> Maybe Expression
-simplify (Lambda x) = Lambda <$> (simplify x)
+simplify (Lambda x) = Lambda <$> simplify x
 simplify (Bound _) = Nothing
 simplify (Unbound _) = Nothing
 simplify (Apply (Lambda x) y) = case (simplify x, simplify y) of
