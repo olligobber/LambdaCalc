@@ -51,43 +51,24 @@ interpret n x
 
 -- Given the result of previous execution and a line of input, produces output
 stateLoop :: Maybe Expression -> String -> (Maybe Expression, Maybe String)
-stateLoop p s = case words s of
-    ('p':_):t -> case parse (unwords t) of
+stateLoop p s = case (toLower $ head $ head $ words s, tail $ words s) of
+    ('p',t) -> case parse (unwords t) of
         Nothing -> (p, Just "Failed to parse")
         Just q -> (Just q, Just "Parsed")
-    ('P':_):t -> case parse (unwords t) of
-        Nothing -> (p, Just "Failed to parse")
-        Just q -> (Just q, Just "Parsed")
-    ('s':_):_ -> case p of
+    ('s',_) -> case p of
         Nothing -> (Nothing, Just "Nothing has been parsed")
         Just q -> (Just q, Just (showExpression q))
-    ('S':_):_ -> case p of
-        Nothing -> (Nothing, Just "Nothing has been parsed")
-        Just q -> (Just q, Just (showExpression q))
-    ('h':_):_ -> (p, Just help)
-    ('H':_):_ -> (p, Just help)
-    ('i':_):n:t -> case parse (unwords t) of
-        Nothing -> case p of
-            Nothing -> (Nothing, Just "Nothing has been parsed")
-            Just q -> case interpret n q of
-                (Nothing, o) -> (p, o)
-                a -> a
-        Just q -> case interpret n q of
+    ('h',_) -> (p, Just help)
+    ('i',n:t) -> case (parse $ unwords t, p) of
+        (Nothing, Nothing) -> (Nothing, Just "Nothing has been parsed")
+        (Nothing, Just q) -> case interpret n q of
             (Nothing, o) -> (p, o)
             a -> a
-    ('I':_):n:t -> case parse (unwords t) of
-        Nothing -> case p of
-            Nothing -> (Nothing, Just "Nothing has been parsed")
-            Just q -> case interpret n q of
-                (Nothing, o) -> (p, o)
-                a -> a
-        Just q -> case interpret n q of
+        (Just q, _) -> case interpret n q of
             (Nothing, o) -> (p, o)
             a -> a
-    ('i':_):_ -> (p, Just "Missing number")
-    ('I':_):_ -> (p, Just "Missing number")
-    ('q':_):_ -> (Nothing, Nothing)
-    ('Q':_):_ -> (Nothing, Nothing)
+    ('i',_) -> (p, Just "Missing number")
+    ('q',_) -> (Nothing, Nothing)
     _ -> (p, Just "Unrecognised command")
 
 loop :: Maybe Expression -> IO ()
