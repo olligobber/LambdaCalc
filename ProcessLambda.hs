@@ -83,11 +83,12 @@ simplify :: Expression -> Maybe Expression
 simplify (Lambda x) = Lambda <$> simplify x
 simplify (Bound _) = Nothing
 simplify (Unbound _) = Nothing
-simplify (Apply (Lambda x) y) = case (simplify x, simplify y) of
-        (Just a, Just b) -> Just (unbindAt b 1 a)
-        (Just a, Nothing) -> Just (unbindAt y 1 a)
-        (Nothing, Just b) -> Just (unbindAt b 1 x)
-        (Nothing, Nothing) -> Just (unbindAt y 1 x)
+simplify (Apply (Lambda x) y) = Just $ increaseDepth (-1) 1 $
+    case (simplify x, simplify y) of
+        (Just a, Just b) -> unbindAt b 1 a
+        (Just a, Nothing) -> unbindAt y 1 a
+        (Nothing, Just b) -> unbindAt b 1 x
+        (Nothing, Nothing) -> unbindAt y 1 x
 simplify (Apply x y) = case (simplify x, simplify y) of
     (Just a, Just b) -> Just (Apply a b)
     (Just a, Nothing) -> Just (Apply a y)
